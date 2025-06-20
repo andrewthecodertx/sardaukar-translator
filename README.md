@@ -15,6 +15,10 @@ A containerized Python application that translates English text to the fictional
 
 ### Using Docker (Recommended)
 
+**Note:** Docker requires proper permissions. If you get permission errors, either:
+- Add your user to the docker group: `sudo usermod -aG docker $USER` (then logout/login)
+- Or use `sudo` with docker commands
+
 ```bash
 # Build and run the application
 docker-compose up --build
@@ -22,8 +26,12 @@ docker-compose up --build
 # Access the web interface
 open http://localhost:8000
 
-# Use the CLI
-docker-compose exec app python cli.py "Hello, world!"
+# Use the CLI inside container
+docker-compose exec sardaukar-translator python cli.py "Hello, world!"
+
+# Alternative: Build and run manually
+docker build -t sardaukar-translator .
+docker run -p 8000:8000 sardaukar-translator
 ```
 
 ### Local Development
@@ -67,9 +75,11 @@ python cli.py "It is done."
 
 | English | Sardaukar | Notes |
 |---------|-----------|-------|
-| "No! We are Sardaukar!" | "Nah! Sardaukar!" | Compression and article removal |
-| "Those who stand against us fall!" | "Suh-oost-ageesta-fallah" | Word collapse, meaning retention |
-| "It is done." | "Et'sa-duh" | Compression, auxiliary verb omission |
+| "No! We are Sardaukar!" | "nah sardaukar!" | Compression and article removal |
+| "Those who stand against us fall!" | "suh-oost-ageesta fallah" | Word collapse, meaning retention |
+| "It is done." | "et duhe." | Compression, auxiliary verb omission |
+| "The spice must flow" | "speceh floow" | Essential meaning preservation |
+| "Victory or death!" | "veek-tor dehth!" | Harsh consonant emphasis |
 
 ## Language Rules
 
@@ -80,9 +90,75 @@ The Sardaukar language is characterized by:
 - **Harsh Phonetics**: Guttural consonants, simplified vowels
 - **Ritualistic Delivery**: Fast, clipped speech with throat singing elements
 
+## CLI Usage Examples
+
+```bash
+# Basic translation
+python cli.py "Hello, world!"
+# Output: heh-loo woor-dah
+
+# With phonetic guide for TTS
+python cli.py "It is done." --phonetic --verbose
+# Output:
+# English: It is done.
+# Sardaukar: et duhe.
+# Phonetic: [HARSH, CLIPPED] et | duhe.
+
+# Pipeline integration with TTS
+echo "The enemy approaches" | python cli.py --stdin | espeak-ng
+
+# Help and options
+python cli.py --help
+```
+
+## API Usage
+
+```bash
+# Start the web server
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Test the API
+curl -X POST "http://localhost:8000/api/translate" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "Victory or death!", "include_phonetics": true}'
+
+# Access interactive API docs
+open http://localhost:8000/api/docs
+```
+
+## Troubleshooting
+
+### Docker Permission Issues
+If you encounter Docker permission errors:
+```bash
+# Add user to docker group (requires logout/login)
+sudo usermod -aG docker $USER
+
+# Or use sudo with docker commands
+sudo docker-compose up --build
+```
+
+### Virtual Environment Issues
+```bash
+# Create fresh virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### TTS Integration
+For command-line text-to-speech integration:
+```bash
+# Install espeak-ng (Ubuntu/Debian)
+sudo apt-get install espeak-ng
+
+# Use with Sardaukar translator
+python cli.py "The spice must flow" | espeak-ng -s 120 -p 30
+```
+
 ## Development Status
 
-🚧 **In Development** - This project is currently being built according to the specifications in `PROJECT_PLAN.md`.
+✅ **Complete** - Full implementation with all features working as specified in [`PROJECT_PLAN.md`](PROJECT_PLAN.md).
 
 ## License
 
