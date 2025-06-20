@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sardaukar Translator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏜️ Sardaukar Translator</h1>
+            <p class="subtitle">Translate English to the fierce language of the Sardaukar</p>
+        </header>
+
+        <main>
+            {% if error %}
+            <div class="error">
+                <strong>Error:</strong> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/translate" class="translation-form">
+                <div class="input-group">
+                    <label for="text">English Text:</label>
+                    <textarea 
+                        id="text" 
+                        name="text" 
+                        rows="4" 
+                        placeholder="Enter English text to translate..."
+                        required
+                    >{% if original %}{{ original }}{% endif %}</textarea>
+                </div>
+
+                <div class="options">
+                    <label class="checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            name="include_phonetics" 
+                            {% if include_phonetics %}checked{% endif %}
+                        >
+                        Include phonetic guide for text-to-speech
+                    </label>
+                </div>
+
+                <button type="submit" class="translate-btn">Translate to Sardaukar</button>
+            </form>
+
+            {% if sardaukar %}
+            <div class="results">
+                <div class="result-section">
+                    <h3>Original Text:</h3>
+                    <div class="text-output original">{{ original }}</div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Sardaukar Translation:</h3>
+                    <div class="text-output sardaukar" id="sardaukar-text">{{ sardaukar }}</div>
+                    <button onclick="speakText('{{ sardaukar }}')" class="speak-btn">🔊 Speak Sardaukar</button>
+                </div>
+
+                {% if phonetic_guide %}
+                <div class="result-section">
+                    <h3>Phonetic Guide:</h3>
+                    <div class="text-output phonetic">{{ phonetic_guide }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="examples">
+                <h3>Examples:</h3>
+                <div class="example-grid">
+                    <div class="example" onclick="fillExample('No! We are Sardaukar!')">
+                        <div class="example-english">"No! We are Sardaukar!"</div>
+                        <div class="example-sardaukar">→ "nah sardaukar!"</div>
+                    </div>
+                    <div class="example" onclick="fillExample('It is done.')">
+                        <div class="example-english">"It is done."</div>
+                        <div class="example-sardaukar">→ "et duh."</div>
+                    </div>
+                    <div class="example" onclick="fillExample('The enemy approaches')">
+                        <div class="example-english">"The enemy approaches"</div>
+                        <div class="example-sardaukar">→ "ehnmee apprahes"</div>
+                    </div>
+                    <div class="example" onclick="fillExample('Victory or death!')">
+                        <div class="example-english">"Victory or death!"</div>
+                        <div class="example-sardaukar">→ "veek-tor dehth!"</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="info">
+                <h4>About Sardaukar Language</h4>
+                <p>
+                    The Sardaukar language is characterized by extreme compression (~75% syllable reduction), 
+                    agglutinative morphology, harsh phonetics, and ritualistic delivery. 
+                    This translator implements the linguistic rules for text-to-speech optimization.
+                </p>
+            </div>
+            
+            <div class="api-info">
+                <h4>API Access</h4>
+                <p>
+                    Programmatic access available at <code>/api/translate</code> 
+                    | <a href="/api/docs">API Documentation</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Text-to-speech functionality
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Configure for harsh, clipped delivery
+                utterance.rate = 1.2;  // Faster delivery
+                utterance.pitch = 0.7; // Lower pitch for harshness
+                utterance.volume = 0.9;
+                
+                // Try to find a suitable voice (prefer male, deep voices)
+                const voices = speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('male') || 
+                    voice.name.toLowerCase().includes('deep')
+                ) || voices[0];
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('Text-to-speech not supported in this browser');
+            }
+        }
+
+        // Fill example text
+        function fillExample(text) {
+            document.getElementById('text').value = text;
+        }
+
+        // Load voices when available
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = function() {
+                // Voices loaded, ready for TTS
+            };
+        }
+    </script>
+</body>
+</html>

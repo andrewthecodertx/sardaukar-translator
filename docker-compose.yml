@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  sardaukar-translator:
+    build: .
+    container_name: sardaukar-translator
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      # Mount source code for development (comment out for production)
+      - .:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a reverse proxy for production deployment
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: sardaukar-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - sardaukar-translator
+  #   restart: unless-stopped
+
+networks:
+  default:
+    name: sardaukar-network
