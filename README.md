@@ -162,4 +162,8 @@ python cli.py "The spice must flow" | espeak-ng -s 120 -p 30
 
 ## License
 
-MIT License - See LICENSE file for details.
+MIT, see [LICENSE](LICENSE).
+
+## Contributing
+
+PRs welcome. Please open an issue first for major changes.
